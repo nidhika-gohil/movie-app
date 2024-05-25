@@ -1,0 +1,10 @@
+.movie_app_header {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  color: white;
+  background-color: #025346;
+}
