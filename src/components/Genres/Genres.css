@@ -1,0 +1,28 @@
+.movie_app_genres_container {
+  display: flex;
+  position: fixed;
+  width: 100%;
+  align-items: center;
+  top: 80px;
+  overflow-x: auto;
+  z-index: 999;
+  padding: 5px;
+  left: 0;
+  box-shadow: 0 2px 4px #0000001a;
+  text-wrap: nowrap;
+  background: #fff;
+}
+
+.movie_app_genres_container::-webkit-scrollbar {
+  display: none;
+}
+
+.movie_app_genre {
+  font-size: 17px;
+  padding: 5px 10px;
+  border-radius: 5%;
+}
+
+.movie_app_genre:hover {
+  background-color: #025346;
+}
