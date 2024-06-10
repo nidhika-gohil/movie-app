@@ -1,7 +1,7 @@
-// import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Movie.css";
 import { GET_MOVIE, IMAGE_PATH } from "../../utils/constants";
-import useScrollMovieList from "../../utils/useScrollMovieList";
+// import useScrollMovieList from "../../utils/useScrollMovieList";
 
 const Movie = () => {
   const [movieList, setMovieList] = useState([]);
@@ -15,11 +15,12 @@ const Movie = () => {
     const list = await data.json();
     setMovieList(list.results);
   };
-  const fetchNextMovieData = async (params = {}) => {
+  const fetchNextMovieData = async (primary_year, direction, params = {}) => {
+    console.log("Year =================== > ", primary_year);
     let url =
       GET_MOVIE +
       "?sort_by=popularity.desc&primary_release_year=" +
-      year +
+      primary_year +
       "&api_key=" +
       process.env.REACT_APP_API_KEY;
     Object.keys(params).forEach((key) => {
@@ -27,8 +28,12 @@ const Movie = () => {
     });
     const data = await fetch(url);
     const list = await data.json();
-    console.log("movieList => ", movieList);
-    setMovieList((prev) => [...prev, ...list.results]);
+    // console.log("movieList => ", movieList);
+    if (direction === "bottom") {
+      setMovieList((prev) => [...prev, ...list.results]);
+    } else {
+      setMovieList((prev) => [...list.results, ...prev]);
+    }
   };
   const mainDebounce = (debcounceFunc, time) => {
     let timer;
@@ -51,14 +56,14 @@ const Movie = () => {
       // put some condition to get the year wise list
       console.log("Scrolled bottom ***************************** ");
       setYear((prev) => prev + 1);
-      fetchNextMovieData();
+      fetchNextMovieData(year + 1, "bottom");
     } else if (scrollTop === 0) {
       // put some condition to get the year wise list
       console.log("Scrolled top ***************************** ");
       setYear((prev) => {
         return prev - 1;
       });
-      fetchNextMovieData();
+      fetchNextMovieData(year - 1, "top");
     }
   }, 500);
   useEffect(() => {
@@ -78,7 +83,7 @@ const Movie = () => {
       <div className="movie_year">{year}</div>
       <div id="movie_list_container">
         {movieList.map((movie) => {
-          console.log("Moview=? ", movie);
+          console.log("Movie =>>>>>>>>>>>>>>>>>>> ", movie);
           return (
             <div className="movie_item" key={movie.id}>
               <img
