@@ -10,7 +10,7 @@ body {
   flex-wrap: wrap;
   justify-content: center;
 }
-#movie_list_container > .movie_item {
+.movie_item {
   width: 200px;
   margin: 20px;
   padding: 3px;

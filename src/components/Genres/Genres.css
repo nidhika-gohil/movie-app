@@ -21,8 +21,10 @@
   font-size: 17px;
   padding: 5px 10px;
   border-radius: 5%;
+  cursor: pointer;
 }
 
-.movie_app_genre:hover {
+.movie_app_genre.selected {
   background-color: #025346;
+  margin: 0 5px;
 }

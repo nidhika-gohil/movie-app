@@ -1,34 +1,50 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "./Movie.css";
 import { GET_MOVIE, IMAGE_PATH } from "../../utils/constants";
+import { GenresContext } from "../../utils/GenresContext";
 // import useScrollMovieList from "../../utils/useScrollMovieList";
 
 const Movie = () => {
   const [movieList, setMovieList] = useState([]);
-  const [year, setYear] = useState(2012);
-  const fetchMovieData = async (params = {}) => {
-    let url = GET_MOVIE + "?api_key=" + process.env.REACT_APP_API_KEY;
-    Object.keys(params).forEach((key) => {
-      url += "&" + key + "=" + params[key];
-    });
+  const [prevYear, setPrevYear] = useState(2012);
+  const [nextYear, setNextYear] = useState(2012);
+  const { selectedGenres } = useContext(GenresContext);
+  const groupMoviesByYear = () => {
+    return movieList.reduce((acc, movie) => {
+      let movieYear = movie.release_date.split("-")[0];
+      if (!acc[movieYear]) {
+        acc[movieYear] = [];
+      }
+      acc[movieYear].push(movie);
+      return acc;
+    }, {});
+  };
+  const fetchMovieData = async (/* params = {} */) => {
+    var listOfGenres = selectedGenres.map((g) => g.id).join(",");
+    let url =
+      GET_MOVIE +
+      "?primary_release_year=2012&vote_count_gte=100&api_key=" +
+      process.env.REACT_APP_API_KEY;
+    if (listOfGenres !== "") {
+      url += "&with_genres=" + listOfGenres.slice(0, -1);
+    }
     const data = await fetch(url);
     const list = await data.json();
     setMovieList(list.results);
   };
-  const fetchNextMovieData = async (primary_year, direction, params = {}) => {
-    console.log("Year =================== > ", primary_year);
+  const fetchNextMovieData = async (primary_year, direction) => {
+    var listOfGenres = selectedGenres.map((g) => g.id).join(",");
     let url =
       GET_MOVIE +
-      "?sort_by=popularity.desc&primary_release_year=" +
+      "?sort_by=popularity.desc&vote_count_gte=100&primary_release_year=" +
       primary_year +
       "&api_key=" +
       process.env.REACT_APP_API_KEY;
-    Object.keys(params).forEach((key) => {
-      url += "&" + key + "=" + params[key];
-    });
+    if (listOfGenres !== "") {
+      url += "&with_genres=" + listOfGenres.slice(0, -1);
+    }
     const data = await fetch(url);
     const list = await data.json();
-    // console.log("movieList => ", movieList);
     if (direction === "bottom") {
       setMovieList((prev) => [...prev, ...list.results]);
     } else {
@@ -54,23 +70,30 @@ const Movie = () => {
 
     if (scrollHeight - scrollTop - clientHeight === 0) {
       // put some condition to get the year wise list
-      console.log("Scrolled bottom ***************************** ");
-      setYear((prev) => prev + 1);
-      fetchNextMovieData(year + 1, "bottom");
+      setNextYear((nextYear) => {
+        const newYear = nextYear + 1;
+        fetchNextMovieData(newYear, "bottom");
+        return newYear;
+      });
     } else if (scrollTop === 0) {
       // put some condition to get the year wise list
-      console.log("Scrolled top ***************************** ");
-      setYear((prev) => {
-        return prev - 1;
+      setPrevYear((prevYear) => {
+        const newYear = prevYear - 1;
+        fetchNextMovieData(newYear, "top");
+        return newYear;
       });
-      fetchNextMovieData(year - 1, "top");
     }
   }, 500);
   useEffect(() => {
     fetchMovieData();
     window.addEventListener("scroll", debounceHandler);
-  }, []);
-
+    return () => {
+      setPrevYear(2012);
+      setNextYear(2012);
+      console.log("Cleaning up event listener ============> ");
+      window.removeEventListener("scroll", debounceHandler);
+    };
+  }, [selectedGenres]);
   if (movieList === undefined || movieList.length === 0) {
     return (
       <div>
@@ -78,26 +101,33 @@ const Movie = () => {
       </div>
     );
   }
+  const groupedMovies = groupMoviesByYear(movieList);
   return (
     <div id="movie_list_main_container">
-      <div className="movie_year">{year}</div>
-      <div id="movie_list_container">
-        {movieList.map((movie) => {
-          console.log("Movie =>>>>>>>>>>>>>>>>>>> ", movie);
-          return (
-            <div className="movie_item" key={movie.id}>
-              <img
-                className="movie_app_image"
-                src={IMAGE_PATH + movie.poster_path}
-              />
-              <div>
-                <div className="movie_app_title">{movie.title}</div>
-                <div className="movie_app_desc">{movie.overview}</div>
-              </div>
+      {Object.entries(groupedMovies).map(([movieYear, updatedMovieList]) => {
+        return (
+          <div key={movieYear}>
+            <div className="movie_year">{movieYear}</div>
+            <div id="movie_list_container">
+              {updatedMovieList.map((movie) => {
+                return (
+                  <div className="movie_item" key={movie.id}>
+                    <img
+                      className="movie_app_image"
+                      src={IMAGE_PATH + movie.poster_path}
+                      alt={movie.title}
+                    />
+                    <div>
+                      <div className="movie_app_title">{movie.title}</div>
+                      <div className="movie_app_desc">{movie.overview}</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
