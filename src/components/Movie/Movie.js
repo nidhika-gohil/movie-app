@@ -6,6 +6,7 @@ import { GenresContext } from "../../utils/GenresContext";
 
 const Movie = () => {
   const [movieList, setMovieList] = useState([]);
+  const [year, setYear] = useState(2012);
   const [prevYear, setPrevYear] = useState(2012);
   const [nextYear, setNextYear] = useState(2012);
   const { selectedGenres } = useContext(GenresContext);
@@ -26,7 +27,7 @@ const Movie = () => {
       "?primary_release_year=2012&vote_count_gte=100&api_key=" +
       process.env.REACT_APP_API_KEY;
     if (listOfGenres !== "") {
-      url += "&with_genres=" + listOfGenres.slice(0, -1);
+      url += "&with_genres=" + listOfGenres;
     }
     const data = await fetch(url);
     const list = await data.json();
@@ -40,8 +41,11 @@ const Movie = () => {
       primary_year +
       "&api_key=" +
       process.env.REACT_APP_API_KEY;
+    // selectedGenres.map((g) => {
+    //   listOfGenres += g.id + ",";
+    // });
     if (listOfGenres !== "") {
-      url += "&with_genres=" + listOfGenres.slice(0, -1);
+      url += "&with_genres=" + listOfGenres;
     }
     const data = await fetch(url);
     const list = await data.json();

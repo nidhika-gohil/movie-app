@@ -7,7 +7,6 @@ const Genres = () => {
   const [genresList, setGenresList] = useState([]);
   const { selectedGenres, setSelectedGenres } = useContext(GenresContext);
   const addSelectionAttribute = (list) => {
-    console.log("Updated Genres =============== > ", list);
     return list.map((genre) => ({ ...genre, selected: false }));
   };
   const fetchGenres = async () => {
@@ -48,7 +47,6 @@ const Genres = () => {
         All
       </div>
       {genresList.map((genre) => {
-        // console.log("genre => ", genre);
         return (
           <div
             className={`movie_app_genre ${
