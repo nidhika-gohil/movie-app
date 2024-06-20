@@ -70,9 +70,9 @@ const Movie = () => {
   const debounceHandler = mainDebounce(() => {
     var scrollHeight = document.documentElement.scrollHeight;
     var scrollTop = document.documentElement.scrollTop;
-    var clientHeight = document.documentElement.clientHeight;
+    var screenHeight = document.documentElement.clientHeight;
 
-    if (scrollHeight - scrollTop - clientHeight === 0) {
+    if (Math.floor(scrollHeight - scrollTop - screenHeight) === 0) {
       // put some condition to get the year wise list
       setNextYear((nextYear) => {
         const newYear = nextYear + 1;
